@@ -1,6 +1,5 @@
 package com.example.shacklehotelbuddy
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -32,6 +31,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,16 +58,18 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.bind()
         setContent {
             ShackleHotelBuddyTheme {
-                MainScreen()
+                val resents = viewModel.recentSearches.observeAsState()
+                MainScreen(resents.value ?: emptyList())
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun MainScreen() {
+    fun MainScreen(recents: List<MainViewModel.SearchParameter>) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -101,21 +103,15 @@ class MainActivity : ComponentActivity() {
                     fontSize = TextUnit(18F, TextUnitType.Sp),
                     color = Color.White
                 )
-                RecentSearches(
-                    states = listOf(
-                        RecentSearchState(
-                            imageRes = R.drawable.manage_history,
-                            title = "Recent Searches",
-                            value = SearchParameterState(
-                                imageRes = R.drawable.event_available,
-                                checkInDate = "DD/MM/YYYY",
-                                checkOutDate = "DD/MM/YYYY",
-                                adults = 1,
-                                children = 0,
-                                value = "1 Room, 1 Adult"
-                            )
-                        )
+                val recentAsState = recents.map {
+                    RecentSearchState(
+                        imageRes = R.drawable.manage_history,
+                        title = "${it.checkInDate} - ${it.checkOutDate}  ${it.adult} Adults, ${it.children} Children",
+                        value = it
                     )
+                }
+                RecentSearches(
+                    states = recentAsState
                 )
 
                 Button(
@@ -272,7 +268,7 @@ class MainActivity : ComponentActivity() {
     data class RecentSearchState(
         val imageRes: Int,
         val title: String,
-        val value: SearchParameterState
+        val value: MainViewModel.SearchParameter
     )
 
     @Composable
@@ -430,7 +426,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun GreetingPreview() {
         ShackleHotelBuddyTheme {
-            MainScreen()
+//            MainScreen(recents.value ?: emptyList())
         }
     }
 }

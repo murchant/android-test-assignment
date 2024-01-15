@@ -20,6 +20,16 @@ class MainViewModel @Inject constructor(
     private val searchDao: SearchDao
 ) : ViewModel() {
 
+    private val _recentSearches = MutableLiveData<List<SearchParameter>>()
+    val recentSearches : LiveData<List<SearchParameter>>
+        get() = _recentSearches
+
+    fun bind() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val searchParameters = searchDao.getAll()
+            _recentSearches.postValue(searchParameters)
+        }
+    }
 
     @Entity
     data class SearchParameter(
@@ -58,7 +68,6 @@ class MainViewModel @Inject constructor(
         currentSearchParameter?.id = UUID.randomUUID().toString()
         _searchParameters.value = currentSearchParameter
         Log.d("MainViewModel", "updateChildrenValue: ${_searchParameters.value}")
-
     }
 
     fun updateCheckInDate(value: String) {
