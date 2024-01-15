@@ -1,9 +1,11 @@
 package com.example.shacklehotelbuddy
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,10 +48,14 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.example.shacklehotelbuddy.ui.theme.ShackleHotelBuddyTheme
+import dagger.hilt.android.AndroidEntryPoint
 import java.time.Instant
 
 @RequiresApi(Build.VERSION_CODES.O)
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -58,328 +64,363 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun MainScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .paint(
-                painterResource(id = R.drawable.background),
-                contentScale = ContentScale.FillWidth
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Column {
-            Text(
-                text = "Select guests, date and time",
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                fontSize = TextUnit(38F, TextUnitType.Sp),
-                color = Color.White
-            )
-            Box(modifier = Modifier.padding(16.dp)) {
-                Column {
-                    SearchParameters()
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Composable
+    fun MainScreen() {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .paint(
+                    painterResource(id = R.drawable.background),
+                    contentScale = ContentScale.FillWidth
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column {
+                Text(
+                    text = "Select guests, date and time",
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp),
+                    fontSize = TextUnit(38F, TextUnitType.Sp),
+                    color = Color.White
+                )
+                Box(modifier = Modifier.padding(16.dp)) {
+                    Column {
+                        SearchParameters()
+                    }
                 }
-            }
-            Text(
-                text = "Recent searches",
-                modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp, bottom = 0.dp),
-                fontSize = TextUnit(18F, TextUnitType.Sp),
-                color = Color.White
-            )
-            RecentSearches(
-                states = listOf(
-                    RecentSearchState(
-                        imageRes = R.drawable.manage_history,
-                        title = "Recent Searches",
-                        value = SearchParameterState(
-                            imageRes = R.drawable.event_available,
-                            checkInDate = "DD/MM/YYYY",
-                            checkOutDate = "DD/MM/YYYY",
-                            adults = 1,
-                            children = 0,
-                            value = "1 Room, 1 Adult"
+                Text(
+                    text = "Recent searches",
+                    modifier = Modifier.padding(
+                        top = 20.dp,
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 0.dp
+                    ),
+                    fontSize = TextUnit(18F, TextUnitType.Sp),
+                    color = Color.White
+                )
+                RecentSearches(
+                    states = listOf(
+                        RecentSearchState(
+                            imageRes = R.drawable.manage_history,
+                            title = "Recent Searches",
+                            value = SearchParameterState(
+                                imageRes = R.drawable.event_available,
+                                checkInDate = "DD/MM/YYYY",
+                                checkOutDate = "DD/MM/YYYY",
+                                adults = 1,
+                                children = 0,
+                                value = "1 Room, 1 Adult"
+                            )
                         )
                     )
                 )
-            )
 
-            Button(
-                onClick = { /*TODO*/ },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ShackleHotelBuddyTheme.colors.teal,
-                    contentColor = ShackleHotelBuddyTheme.colors.white
-                ),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-            ) {
-                Text(text = "Search")
-            }
-        }
-    }
-}
-
-@Composable
-fun RecentSearch(state: RecentSearchState) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(40.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.manage_history),
-            contentDescription = "",
-            modifier = Modifier
-                .padding(end = 8.dp)
-        )
-        Text(
-            text = state.title,
-            style = ShackleHotelBuddyTheme.typography.bodyMedium,
-            color = ShackleHotelBuddyTheme.colors.grayText,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-        )
-    }
-}
-
-@Composable
-fun RecentSearches(states: List<RecentSearchState>) {
-    LazyColumn(
-        modifier = Modifier
-            .padding(vertical = 16.dp, horizontal = 16.dp)
-            .clip(shape = RoundedCornerShape(5.dp))
-            .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
-            .background(ShackleHotelBuddyTheme.colors.white)
-    ) {
-        states.forEach {
-            item {
-                RecentSearch(
-                    state = RecentSearchState(
-                        imageRes = R.drawable.manage_history,
-                        title = it.title,
-                        value = it.value
-                    )
-                )
-            }
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-private fun SearchParameters() {
-    LazyColumn(
-        modifier = Modifier
-            .clip(shape = RoundedCornerShape(20.dp))
-            .background(color = ShackleHotelBuddyTheme.colors.white)
-    ) {
-        item {
-            SearchDateParameter(
-                state = RowState(
-                    imageRes = R.drawable.event_available,
-                    title = "Check-in-date"
-                )
-            )
-            SearchDateParameter(
-                state = RowState(
-                    imageRes = R.drawable.event_available,
-                    title = "Check-out-date"
-                )
-            )
-            SearchTextParameter(
-                state = RowState(
-                    imageRes = R.drawable.event_available,
-                    title = "Adult"
-                )
-            )
-            SearchTextParameter(
-                state = RowState(
-                    imageRes = R.drawable.event_available,
-                    title = "Children"
-                )
-            )
-        }
-    }
-}
-
-data class SearchParameterState(
-    val imageRes: Int,
-    val checkInDate: String,
-    val checkOutDate: String,
-    val adults: Int,
-    val children: Int,
-    val value: String
-)
-
-data class RowState(
-    val imageRes: Int,
-    val title: String,
-)
-
-data class RecentSearchState(
-    val imageRes: Int,
-    val title: String,
-    val value: SearchParameterState
-)
-
-@Composable
-private fun SearchTextParameter(state: RowState, action: () -> Unit = {}) {
-    var value by remember { mutableStateOf("") }
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        Box(
-            modifier = Modifier
-                .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
-                .background(ShackleHotelBuddyTheme.colors.white)
-                .weight(1f)
-                .padding(16.dp)
-        ) {
-            Row {
-                Image(
-                    painter = painterResource(id = state.imageRes),
-                    contentDescription = "",
+                Button(
+                    onClick = {
+                        navigateToSearchResults()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ShackleHotelBuddyTheme.colors.teal,
+                        contentColor = ShackleHotelBuddyTheme.colors.white
+                    ),
                     modifier = Modifier
-                        .padding(end = 8.dp)
-                )
-                Text(
-                    text = state.title,
-                    style = ShackleHotelBuddyTheme.typography.bodyMedium,
-                    color = ShackleHotelBuddyTheme.colors.grayText,
-                    textAlign = TextAlign.Start,
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
-                .background(ShackleHotelBuddyTheme.colors.white)
-                .weight(1f)
-        ) {
-            TextField(
-                value = value,
-                modifier = Modifier
-                    .background(Color.Transparent),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                onValueChange = { value = it },
-                textStyle = ShackleHotelBuddyTheme.typography.bodyMedium,
-            )
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-private fun SearchDateParameter(state: RowState, action: () -> Unit = {}) {
-    var value by remember { mutableStateOf("") }
-    var isDatePickerVisible by remember { mutableStateOf(false) }
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        Box(
-            modifier = Modifier
-                .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
-                .background(ShackleHotelBuddyTheme.colors.white)
-                .weight(1f)
-                .padding(16.dp)
-        ) {
-            Row {
-                Image(
-                    painter = painterResource(id = state.imageRes),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                )
-                Text(
-                    text = state.title,
-                    style = ShackleHotelBuddyTheme.typography.bodyMedium,
-                    color = ShackleHotelBuddyTheme.colors.grayText,
-                    textAlign = TextAlign.Start,
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
-                .background(ShackleHotelBuddyTheme.colors.white)
-                .clickable {
-                    isDatePickerVisible = !isDatePickerVisible
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                ) {
+                    Text(text = "Search")
                 }
-                .weight(1f)
-                .padding(16.dp)
+            }
+        }
+    }
+
+    fun navigateToSearchResults() {
+        startActivity(Intent(this, SearchResultsActivity::class.java))
+    }
+
+    @Composable
+    fun RecentSearch(state: RecentSearchState) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .height(40.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.manage_history),
+                contentDescription = "",
+                modifier = Modifier
+                    .padding(end = 8.dp)
+            )
             Text(
-                text = value,
+                text = state.title,
                 style = ShackleHotelBuddyTheme.typography.bodyMedium,
                 color = ShackleHotelBuddyTheme.colors.grayText,
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
+                modifier = Modifier
             )
         }
-        if (isDatePickerVisible) {
-            SimpleDatePickerInDatePickerDialog(
-                openDialog = isDatePickerVisible,
-                onDismiss = { isDatePickerVisible = false },
-                onConfirm = { date ->
-                    value = Instant.ofEpochMilli(date).toString()
-                    isDatePickerVisible = false
+    }
+
+    @Composable
+    fun RecentSearches(states: List<RecentSearchState>) {
+        LazyColumn(
+            modifier = Modifier
+                .padding(vertical = 16.dp, horizontal = 16.dp)
+                .clip(shape = RoundedCornerShape(5.dp))
+                .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
+                .background(ShackleHotelBuddyTheme.colors.white)
+        ) {
+            states.forEach {
+                item {
+                    RecentSearch(
+                        state = RecentSearchState(
+                            imageRes = R.drawable.manage_history,
+                            title = it.title,
+                            value = it.value
+                        )
+                    )
                 }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Composable
+    private fun SearchParameters() {
+        LazyColumn(
+            modifier = Modifier
+                .clip(shape = RoundedCornerShape(20.dp))
+                .background(color = ShackleHotelBuddyTheme.colors.white)
+        ) {
+            item {
+                SearchDateParameter(
+                    state = RowState(
+                        imageRes = R.drawable.event_available,
+                        title = "Check-in-date"
+                    ),
+                    action = ::updateCheckInDate
+                )
+                SearchDateParameter(
+                    state = RowState(
+                        imageRes = R.drawable.event_available,
+                        title = "Check-out-date"
+                    ),
+                    action = ::updateCheckoutDate
+                )
+                SearchTextParameter(
+                    state = RowState(
+                        imageRes = R.drawable.event_available,
+                        title = "Adult"
+                    ),
+                    action = ::updateAdultValue
+                )
+                SearchTextParameter(
+                    state = RowState(
+                        imageRes = R.drawable.event_available,
+                        title = "Children"
+                    ),
+                    action = ::updateChildrenValue
+                )
+            }
+        }
+    }
+
+    private fun updateAdultValue(value: Int) {
+        viewModel.updateAdultValue(value)
+    }
+
+    private fun updateChildrenValue(value: Int) {
+        viewModel.updateChildrenValue(value)
+    }
+
+    private fun updateCheckoutDate(date: String) {
+        viewModel.updateCheckInDate(date)
+    }
+
+    private fun updateCheckInDate(date: String) {
+        viewModel.updateCheckOutDate(date)
+    }
+
+    data class SearchParameterState(
+        val imageRes: Int,
+        val checkInDate: String,
+        val checkOutDate: String,
+        val adults: Int,
+        val children: Int,
+        val value: String
+    )
+
+    data class RowState(
+        val imageRes: Int,
+        val title: String,
+    )
+
+    data class RecentSearchState(
+        val imageRes: Int,
+        val title: String,
+        val value: SearchParameterState
+    )
+
+    @Composable
+    private fun SearchTextParameter(state: RowState, action: (value: Int) -> Unit = {}) {
+        var value by remember { mutableStateOf("") }
+        Row(
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Box(
+                modifier = Modifier
+                    .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
+                    .background(ShackleHotelBuddyTheme.colors.white)
+                    .weight(1f)
+                    .padding(16.dp)
+            ) {
+                Row {
+                    Image(
+                        painter = painterResource(id = state.imageRes),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                    )
+                    Text(
+                        text = state.title,
+                        style = ShackleHotelBuddyTheme.typography.bodyMedium,
+                        color = ShackleHotelBuddyTheme.colors.grayText,
+                        textAlign = TextAlign.Start,
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
+                    .background(ShackleHotelBuddyTheme.colors.white)
+                    .weight(1f)
+            ) {
+                TextField(
+                    value = value,
+                    modifier = Modifier
+                        .background(Color.Transparent),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    onValueChange = {
+                        value = it
+                        action(it.toInt())
+                    },
+                    textStyle = ShackleHotelBuddyTheme.typography.bodyMedium,
+                )
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Composable
+    private fun SearchDateParameter(state: RowState, action: (date: String) -> Unit = {}) {
+        var value by remember { mutableStateOf("") }
+        var isDatePickerVisible by remember { mutableStateOf(false) }
+        Row(
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Box(
+                modifier = Modifier
+                    .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
+                    .background(ShackleHotelBuddyTheme.colors.white)
+                    .weight(1f)
+                    .padding(16.dp)
+            ) {
+                Row {
+                    Image(
+                        painter = painterResource(id = state.imageRes),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                    )
+                    Text(
+                        text = state.title,
+                        style = ShackleHotelBuddyTheme.typography.bodyMedium,
+                        color = ShackleHotelBuddyTheme.colors.grayText,
+                        textAlign = TextAlign.Start,
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
+                    .background(ShackleHotelBuddyTheme.colors.white)
+                    .clickable {
+                        isDatePickerVisible = !isDatePickerVisible
+                    }
+                    .weight(1f)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = value,
+                    style = ShackleHotelBuddyTheme.typography.bodyMedium,
+                    color = ShackleHotelBuddyTheme.colors.grayText,
+                    textAlign = TextAlign.Start
+                )
+            }
+            if (isDatePickerVisible) {
+                SimpleDatePickerInDatePickerDialog(
+                    openDialog = isDatePickerVisible,
+                    onDismiss = { isDatePickerVisible = false },
+                    onConfirm = { date ->
+                        value = Instant.ofEpochMilli(date).toString()
+                        isDatePickerVisible = false
+                        action(value)
+                    }
+                )
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Composable
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun SimpleDatePickerInDatePickerDialog(
+        openDialog: Boolean,
+        onDismiss: () -> Unit,
+        onConfirm: (date: Long) -> Unit
+    ) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = System.currentTimeMillis()
+        )
+        DatePickerDialog(
+            shape = RoundedCornerShape(6.dp),
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                // Seems broken at the moment with DateRangePicker
+                // Works fine with DatePicker
+                Button(onClick = {
+                    datePickerState.selectedDateMillis?.let(onConfirm)
+                }) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                Button(onClick = onDismiss) {
+                    Text(text = "Dismiss")
+                }
+            },
+        ) {
+            DatePicker(
+                state = datePickerState
             )
         }
     }
-}
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun SimpleDatePickerInDatePickerDialog(
-    openDialog: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: (date: Long) -> Unit
-) {
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis()
-    )
-    DatePickerDialog(
-        shape = RoundedCornerShape(6.dp),
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            // Seems broken at the moment with DateRangePicker
-            // Works fine with DatePicker
-            Button(onClick = {
-                datePickerState.selectedDateMillis?.let(onConfirm)
-            }) {
-                Text(text = "Confirm")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text(text = "Dismiss")
-            }
-        },
-    ) {
-        DatePicker(
-            state = datePickerState
-        )
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ShackleHotelBuddyTheme {
-        MainScreen()
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Preview(showBackground = true)
+    @Composable
+    fun GreetingPreview() {
+        ShackleHotelBuddyTheme {
+            MainScreen()
+        }
     }
 }
