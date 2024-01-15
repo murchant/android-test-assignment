@@ -138,6 +138,7 @@ class MainActivity : ComponentActivity() {
 
     fun navigateToSearchResults() {
         val currentState = viewModel.searchParameters.value
+        viewModel.saveSearchParameters(currentState)
         startActivity(
             SearchResultsActivity.newIntent(
                 this,
