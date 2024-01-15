@@ -1,83 +1,123 @@
 package com.example.shacklehotelbuddy
 
-import android.os.Build
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.shacklehotelbuddy.data.Respository
 import com.example.shacklehotelbuddy.ui.theme.ShackleHotelBuddyTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SearchResultsActivity : ComponentActivity() {
+
+    private val viewModel: SearchResultsViewModel by viewModels()
+    private val checkInDate: String by lazy {
+        intent.getStringExtra(CHECK_IN_DATE) ?: ""
+    }
+    private val checkOutDate: String by lazy {
+        intent.getStringExtra(CHECK_OUT_DATE) ?: ""
+    }
+    private val adults: Int by lazy {
+        intent.getIntExtra(ADULTS, 0)
+    }
+    private val children: Int by lazy {
+        intent.getIntExtra(CHILDREN, 0)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.bind(checkInDate, checkOutDate, adults, children)
         setContent {
             ShackleHotelBuddyTheme {
-                SearchResultsMainScreen()
+                val searchResults = viewModel.viewSate.observeAsState()
+                SearchResultsMainScreen(searchResults.value ?: emptyList(), ::navigateBack)
             }
         }
     }
 
+    private fun navigateBack() {
+        finish()
+    }
 
-    data class SearchResult(
-        val hotelName: String,
-        val hotelCity: String,
-        val hotelPrice: String,
-        val hotelRating: String,
-        val hotelImage: String
-    )
-}
+    companion object {
+        private const val TAG = "SearchResultsActivity"
+        const val CHECK_IN_DATE = "checkInDate"
+        const val CHECK_OUT_DATE = "checkOutDate"
+        const val ADULTS = "adults"
+        const val CHILDREN = "children"
 
-@Composable
-fun SearchResultsMainScreen() {
-    Column {
-        Header()
-        SearchResults(
-            listOf(
-                SearchResultsActivity.SearchResult(
-                    "Hotel Name",
-                    "Hotel City",
-                    "Hotel Price",
-                    "Hotel Rating",
-                    "Hotel Image"
-                )
-            )
-        )
+        fun newIntent(
+            context: Context,
+            checkInDate: String,
+            checkOutDate: String,
+            adults: Int,
+            children: Int
+        ): Intent {
+            val intent = Intent(context, SearchResultsActivity::class.java)
+            intent.putExtra(CHECK_IN_DATE, checkInDate)
+            intent.putExtra(CHECK_OUT_DATE, checkOutDate)
+            intent.putExtra(ADULTS, adults)
+            intent.putExtra(CHILDREN, children)
+            return intent
+        }
     }
 }
 
 @Composable
-private fun Header() {
+fun SearchResultsMainScreen(
+    hotelSearchResults: List<Respository.SearchResultWithDetails>,
+    backButtonEvent: () -> Unit
+) {
+    Column {
+        Header(backButtonEvent)
+        LazyColumn {
+            items(hotelSearchResults.size) { index ->
+                SearchResult(hotelSearchResults[index])
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun Header(backButtonEvent: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
     ) {
         IconButton(
+            modifier = Modifier
+                .padding(end = 16.dp),
             onClick = {
+                backButtonEvent()
             }
         ) {
             Image(painter = painterResource(R.drawable.arrow_back), contentDescription = "")
@@ -85,63 +125,71 @@ private fun Header() {
         Text(
             text = "Search Results",
             color = Color.Black,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            fontSize = TextUnit(20F, TextUnitType.Sp),
             modifier = Modifier
                 .padding(end = 16.dp)
-                .background(colorResource(id = R.color.teal))
         )
     }
 }
 
 @Composable
-fun SearchResults(searchResults: List<SearchResultsActivity.SearchResult>) {
-    LazyColumn() {
-        items(searchResults.size) { index ->
-            SearchResult(searchResults[index])
-        }
-    }
-}
-
-
-@Composable
-private fun SearchResult(searchResult: SearchResultsActivity.SearchResult) {
+private fun SearchResult(searchResult: Respository.SearchResultWithDetails) {
     Column {
-        Image(
-            painter = painterResource(R.drawable.background),
-            contentDescription = "",
-            modifier = Modifier
-                .clip(
-                    shape = RoundedCornerShape(5.dp)
-                )
-                .padding(vertical = 16.dp, horizontal = 16.dp)
-                .fillMaxWidth()
-                .height(200.dp)
-        )
+        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
+            AsyncImage(
+                model = searchResult.hotelImage,
+                contentDescription = "",
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .fillMaxSize()
+                    .height(200.dp)
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = searchResult.hotelName)
-            Text(text = searchResult.hotelRating)
+            Text(
+                text = searchResult.hotelName,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
+            StarAndRating(searchResult)
         }
         Text(
             text = searchResult.hotelCity, modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
+            color = ShackleHotelBuddyTheme.colors.grayText
         )
         Text(
-            text = searchResult.hotelPrice, modifier = Modifier
+            text = "${searchResult.hotelPrice} night", modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
         )
     }
 }
+
+@Composable
+private fun StarAndRating(searchResult: Respository.SearchResultWithDetails) {
+    Row {
+        Icon(
+            painterResource(id = R.drawable.star),
+            contentDescription = ""
+        )
+        Text(text = searchResult.hotelRating)
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
 fun SearchPreview() {
     ShackleHotelBuddyTheme {
-        SearchResultsMainScreen()
+//        SearchResultsMainScreen()
     }
 }

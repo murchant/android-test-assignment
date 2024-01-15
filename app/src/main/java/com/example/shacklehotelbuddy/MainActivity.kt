@@ -137,7 +137,16 @@ class MainActivity : ComponentActivity() {
     }
 
     fun navigateToSearchResults() {
-        startActivity(Intent(this, SearchResultsActivity::class.java))
+        val currentState = viewModel.searchParameters.value
+        startActivity(
+            SearchResultsActivity.newIntent(
+                this,
+                currentState?.checkInDate ?: "",
+                currentState?.checkOutDate ?: "",
+                currentState?.adult ?: 0,
+                currentState?.children ?: 0
+            )
+        )
     }
 
     @Composable
