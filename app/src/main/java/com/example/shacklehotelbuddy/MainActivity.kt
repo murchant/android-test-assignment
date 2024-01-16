@@ -325,29 +325,14 @@ private fun SearchTextParameter(state: RowState, action: (value: Int) -> Unit = 
     Row(
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        Box(
-            modifier = Modifier
+        TitleCell(
+            state = state, modifier = Modifier
                 .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
                 .background(ShackleHotelBuddyTheme.colors.white)
                 .height(50.dp)
-                .weight(1f)
+                .weight(1F)
                 .padding(16.dp)
-        ) {
-            Row {
-                Image(
-                    painter = painterResource(id = state.imageRes),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                )
-                Text(
-                    text = state.title,
-                    style = ShackleHotelBuddyTheme.typography.bodyMedium,
-                    color = ShackleHotelBuddyTheme.colors.grayText,
-                    textAlign = TextAlign.Start,
-                )
-            }
-        }
+        )
         Box(
             modifier = Modifier
                 .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
@@ -381,6 +366,28 @@ private fun SearchTextParameter(state: RowState, action: (value: Int) -> Unit = 
     }
 }
 
+@Composable
+fun TitleCell(state: RowState, modifier: Modifier) {
+    Box(
+        modifier = modifier
+    ) {
+        Row {
+            Image(
+                painter = painterResource(id = state.imageRes),
+                contentDescription = "",
+                modifier = Modifier
+                    .padding(end = 8.dp)
+            )
+            Text(
+                text = state.title,
+                style = ShackleHotelBuddyTheme.typography.bodyMedium,
+                color = ShackleHotelBuddyTheme.colors.grayText,
+                textAlign = TextAlign.Start,
+            )
+        }
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun SearchDateParameter(
@@ -393,29 +400,14 @@ private fun SearchDateParameter(
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
     ) {
-        Box(
-            modifier = Modifier
+        TitleCell(
+            state = state, modifier = Modifier
                 .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
                 .background(ShackleHotelBuddyTheme.colors.white)
                 .height(50.dp)
-                .weight(1f)
+                .weight(1F)
                 .padding(16.dp)
-        ) {
-            Row {
-                Image(
-                    painter = painterResource(id = state.imageRes),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                )
-                Text(
-                    text = state.title,
-                    style = ShackleHotelBuddyTheme.typography.bodyMedium,
-                    color = ShackleHotelBuddyTheme.colors.grayText,
-                    textAlign = TextAlign.Start,
-                )
-            }
-        }
+        )
         Box(
             modifier = Modifier
                 .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
