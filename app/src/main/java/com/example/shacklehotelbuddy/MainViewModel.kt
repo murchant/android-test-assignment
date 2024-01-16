@@ -5,9 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.example.shacklehotelbuddy.data.SearchParameter
 import com.example.shacklehotelbuddy.data.db.SearchDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +19,7 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _recentSearches = MutableLiveData<List<SearchParameter>>()
-    val recentSearches : LiveData<List<SearchParameter>>
+    val recentSearches: LiveData<List<SearchParameter>>
         get() = _recentSearches
 
     fun bind() {
@@ -30,15 +28,6 @@ class MainViewModel @Inject constructor(
             _recentSearches.postValue(searchParameters)
         }
     }
-
-    @Entity
-    data class SearchParameter(
-        @PrimaryKey var id: String,
-        @ColumnInfo(name = "adult") var adult: Int,
-        @ColumnInfo(name="children") var children: Int,
-        @ColumnInfo(name="checkInDate") var checkInDate: String,
-        @ColumnInfo(name="checkOutDate") var checkOutDate: String,
-    )
 
     private val _searchParameters = MutableLiveData(
         SearchParameter(
@@ -60,8 +49,8 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    val searchParameters : LiveData<SearchParameter>
-        get() =  _searchParameters
+    val searchParameters: LiveData<SearchParameter>
+        get() = _searchParameters
 
     fun updateAdultValue(value: Int) {
         val currentSearchParameter = searchParameters.value
@@ -108,10 +97,20 @@ class MainViewModel @Inject constructor(
     fun formatDate(date: String): String {
         val dateParts = date.split("T")
         val units = dateParts[0].split("-")
-        Log.d("MainViewModel", "formatDate: $units")
         val year = units[0]
         val month = units[1]
         val day = units[2]
         return "$day/$month/$year"
     }
 }
+
+data class RowState(
+    val imageRes: Int,
+    val title: String,
+)
+
+data class RecentSearchState(
+    val imageRes: Int,
+    val title: String,
+    val value: SearchParameter
+)
