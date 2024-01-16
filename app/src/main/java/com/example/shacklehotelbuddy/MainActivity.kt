@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -42,6 +43,8 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
@@ -67,6 +70,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.bind()
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun MainScreen(recents: List<MainViewModel.SearchParameter>) {
@@ -82,9 +90,10 @@ class MainActivity : ComponentActivity() {
             Column {
                 Text(
                     text = "Select guests, date and time",
+                    fontWeight = FontWeight.Medium,
                     modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    fontSize = TextUnit(38F, TextUnitType.Sp),
+                        .padding(horizontal = 20.dp),
+                    fontSize = TextUnit(40F, TextUnitType.Sp),
                     color = Color.White
                 )
                 Box(modifier = Modifier.padding(16.dp)) {
@@ -100,13 +109,14 @@ class MainActivity : ComponentActivity() {
                         end = 16.dp,
                         bottom = 0.dp
                     ),
-                    fontSize = TextUnit(18F, TextUnitType.Sp),
+                    fontSize = TextUnit(22F, TextUnitType.Sp),
+                    fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
                 val recentAsState = recents.map {
                     RecentSearchState(
                         imageRes = R.drawable.manage_history,
-                        title = "${it.checkInDate} - ${it.checkOutDate}  ${it.adult} Adults, ${it.children} Children",
+                        title = "${viewModel.formatDate(it.checkInDate)} - ${viewModel.formatDate(it.checkOutDate)}  ${it.adult} Adults, ${it.children} Children",
                         value = it
                     )
                 }
@@ -124,9 +134,13 @@ class MainActivity : ComponentActivity() {
                     ),
                     modifier = Modifier
                         .padding(16.dp)
+                        .height(60.dp)
                         .fillMaxWidth(),
                 ) {
-                    Text(text = "Search")
+                    Text(
+                        text = "Search",
+                        fontSize = TextUnit(18F, TextUnitType.Sp),
+                    )
                 }
             }
         }
@@ -134,16 +148,20 @@ class MainActivity : ComponentActivity() {
 
     fun navigateToSearchResults() {
         val currentState = viewModel.searchParameters.value
-        viewModel.saveSearchParameters(currentState)
-        startActivity(
-            SearchResultsActivity.newIntent(
-                this,
-                currentState?.checkInDate ?: "",
-                currentState?.checkOutDate ?: "",
-                currentState?.adult ?: 0,
-                currentState?.children ?: 0
-            )
-        )
+        currentState?.let {
+            if (it.adult != 0 && it.children != 0 && it.checkInDate != "" && it.checkOutDate != "") {
+                viewModel.saveSearchParameters(currentState)
+                startActivity(
+                    SearchResultsActivity.newIntent(
+                        this,
+                        it.checkInDate,
+                        it.checkOutDate,
+                        it.adult,
+                        it.children
+                    )
+                )
+            }
+        }
     }
 
     @Composable
@@ -165,6 +183,7 @@ class MainActivity : ComponentActivity() {
                 text = state.title,
                 style = ShackleHotelBuddyTheme.typography.bodyMedium,
                 color = ShackleHotelBuddyTheme.colors.grayText,
+                fontSize = TextUnit(13F, TextUnitType.Sp),
                 textAlign = TextAlign.Start,
                 modifier = Modifier
             )
@@ -205,7 +224,7 @@ class MainActivity : ComponentActivity() {
             item {
                 SearchDateParameter(
                     state = RowState(
-                        imageRes = R.drawable.event_available,
+                        imageRes = R.drawable.event_upcoming,
                         title = "Check-in-date"
                     ),
                     action = ::updateCheckInDate
@@ -219,14 +238,14 @@ class MainActivity : ComponentActivity() {
                 )
                 SearchTextParameter(
                     state = RowState(
-                        imageRes = R.drawable.event_available,
+                        imageRes = R.drawable.person,
                         title = "Adult"
                     ),
                     action = ::updateAdultValue
                 )
                 SearchTextParameter(
                     state = RowState(
-                        imageRes = R.drawable.event_available,
+                        imageRes = R.drawable.supervisor_account,
                         title = "Children"
                     ),
                     action = ::updateChildrenValue
@@ -307,6 +326,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 TextField(
                     value = value,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier
                         .background(Color.Transparent),
                     colors = TextFieldDefaults.colors(
@@ -317,7 +337,9 @@ class MainActivity : ComponentActivity() {
                     ),
                     onValueChange = {
                         value = it
-                        action(it.toInt())
+                        if(it != "") {
+                            action(it.toInt())
+                        }
                     },
                     textStyle = ShackleHotelBuddyTheme.typography.bodyMedium,
                 )
@@ -366,7 +388,7 @@ class MainActivity : ComponentActivity() {
                     .padding(16.dp)
             ) {
                 Text(
-                    text = value,
+                    text = formateToDisplayValue(value),
                     style = ShackleHotelBuddyTheme.typography.bodyMedium,
                     color = ShackleHotelBuddyTheme.colors.grayText,
                     textAlign = TextAlign.Start
@@ -383,6 +405,14 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
+        }
+    }
+
+    private fun formateToDisplayValue(value: String): String {
+        return if(value != "") {
+            viewModel.formatDate(value)
+        } else {
+            ""
         }
     }
 

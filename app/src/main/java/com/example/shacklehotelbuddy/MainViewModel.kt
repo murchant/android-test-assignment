@@ -50,6 +50,16 @@ class MainViewModel @Inject constructor(
         )
     )
 
+    fun resetSearchParameters() {
+        _searchParameters.value = SearchParameter(
+            UUID.randomUUID().toString(),
+            0,
+            0,
+            "",
+            ""
+        )
+    }
+
     val searchParameters : LiveData<SearchParameter>
         get() =  _searchParameters
 
@@ -93,5 +103,15 @@ class MainViewModel @Inject constructor(
                 searchDao.insert(it)
             }
         }
+    }
+
+    fun formatDate(date: String): String {
+        val dateParts = date.split("T")
+        val units = dateParts[0].split("-")
+        Log.d("MainViewModel", "formatDate: $units")
+        val year = units[0]
+        val month = units[1]
+        val day = units[2]
+        return "$day/$month/$year"
     }
 }
