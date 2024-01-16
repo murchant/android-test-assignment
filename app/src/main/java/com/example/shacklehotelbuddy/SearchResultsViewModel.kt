@@ -20,7 +20,7 @@ class SearchResultsViewModel @Inject constructor(
 
     fun bind(checkInDate: String, checkOutDate: String, adults: Int, children: Int) {
         viewModelScope.launch {
-            val searchResults = repository.getSearchResults(checkInDate, checkOutDate, adults, children)
+            val searchResults = repository.getSearchResults(checkInDate, checkOutDate, adults, children).filterNotNull()
             _viewState.postValue(searchResults)
         }
     }

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PropertyDetailsResponse(
-    val data: PropertyDetails
+    val data: PropertyDetails?
 )
 
 @Serializable
@@ -17,7 +17,6 @@ data class PropertyDetails(
 @Serializable
 data class PropertyInfo(
     val summary: Summary,
-    val location: Location
 )
 
 @Serializable
@@ -32,7 +31,8 @@ data class AddressResponse(
 @Serializable
 data class Summary(
     val name: String,
-    val overview: Overview
+    val overview: Overview,
+    val location: Location
 )
 
 @Serializable
@@ -42,12 +42,22 @@ data class Overview(
 
 @Serializable
 data class PropertyRating(
-    val rating: Int
+    val rating: Float
 )
 
 
 @Serializable
 data class SearchRequestResponse(
+    val data : ResultData,
+)
+
+@Serializable
+data class ResultData(
+    val propertySearch: PropertySearch
+)
+
+@Serializable
+data class PropertySearch(
     val properties: List<Property>
 )
 
@@ -60,26 +70,27 @@ data class Property(
 
 @Serializable
 data class PropertyImage(
-    val fallbackImage: FallbackImage
+    val image: Image
 )
 
 @Serializable
-data class FallbackImage(
+data class Image(
     val url: String
 )
 
 @Serializable
 data class SearchRequestBody(
-    val destination: Region = Region("6054439"),
+    val destination: Region,
     val checkInDate: CheckDate,
     val checkOutDate: CheckDate,
-    val rooms: List<RoomConfiguration> = listOf(
-        RoomConfiguration(
-            adults = 1,
-            children = listOf(Age(3)),
-        )
-    ),
-    val limit: Int = 10
+    val limit: Int,
+    val rooms: List<RoomConfiguration>,
+    val resultsSize: Int
+)
+
+@Serializable
+data class DetailsRequestBody(
+    val propertyId: String
 )
 
 @Serializable
