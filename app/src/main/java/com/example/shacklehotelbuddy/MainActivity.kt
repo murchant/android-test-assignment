@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -300,6 +302,7 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier
                     .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
                     .background(ShackleHotelBuddyTheme.colors.white)
+                    .height(50.dp)
                     .weight(1f)
                     .padding(16.dp)
             ) {
@@ -321,12 +324,13 @@ class MainActivity : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
+                    .height(50.dp)
                     .background(ShackleHotelBuddyTheme.colors.white)
                     .weight(1f)
             ) {
                 TextField(
                     value = value,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                     modifier = Modifier
                         .background(Color.Transparent),
                     colors = TextFieldDefaults.colors(
@@ -353,12 +357,13 @@ class MainActivity : ComponentActivity() {
         var value by remember { mutableStateOf("") }
         var isDatePickerVisible by remember { mutableStateOf(false) }
         Row(
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.SpaceAround,
         ) {
             Box(
                 modifier = Modifier
                     .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
                     .background(ShackleHotelBuddyTheme.colors.white)
+                    .height(50.dp)
                     .weight(1f)
                     .padding(16.dp)
             ) {
@@ -381,6 +386,7 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier
                     .border(width = 0.5.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
                     .background(ShackleHotelBuddyTheme.colors.white)
+                    .height(50.dp)
                     .clickable {
                         isDatePickerVisible = !isDatePickerVisible
                     }
