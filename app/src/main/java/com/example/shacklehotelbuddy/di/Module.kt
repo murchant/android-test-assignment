@@ -1,4 +1,4 @@
-package com.example.shacklehotelbuddy.data.di
+package com.example.shacklehotelbuddy.di
 
 import android.content.Context
 import androidx.room.Room

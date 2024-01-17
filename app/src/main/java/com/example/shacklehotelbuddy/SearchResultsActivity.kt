@@ -225,7 +225,7 @@ private fun SearchResult(searchResult: Respository.SearchResultWithDetails?) {
                 color = ShackleHotelBuddyTheme.colors.grayText
             )
             Text(
-                text = "${searchResult.hotelPrice} night", modifier = Modifier
+                text = "${searchResult.price} night", modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold

@@ -32,7 +32,7 @@ data class AddressResponse(
 data class Summary(
     val name: String,
     val overview: Overview,
-    val location: Location
+    val location: Location,
 )
 
 @Serializable
@@ -65,7 +65,18 @@ data class PropertySearch(
 data class Property(
     val id: String,
     val name: String,
-    val propertyImage: PropertyImage
+    val propertyImage: PropertyImage,
+    val price : Price,
+)
+
+@Serializable
+data class Price(
+    val lead: Lead
+)
+
+@Serializable
+data class Lead(
+    val amount: Float
 )
 
 @Serializable
