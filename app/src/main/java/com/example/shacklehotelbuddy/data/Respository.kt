@@ -47,7 +47,7 @@ class Respository @Inject constructor(
             return Result.Empty("No results found")
         } else {
             val resultsWithData =  searchResults.data.propertySearch.properties.mapIndexed { index, property ->
-                val details = getPropertyDetails(property.id)
+                val details = service.getPropertyDetails(property.id)
                 details.data?.let { propertyDetails ->
                     SearchResultWithDetails(
                         hotelName = propertyDetails.propertyInfo.summary.name,
@@ -60,18 +60,5 @@ class Respository @Inject constructor(
             }
             return Result.Success(resultsWithData)
         }
-    }
-
-
-    data class SearchResultWithDetails(
-        val hotelName: String,
-        val hotelCity: String,
-        val hotelRating: String,
-        val hotelImage: String,
-        val price: String
-    )
-
-    suspend fun getPropertyDetails(id: String): PropertyDetailsResponse {
-        return service.getPropertyDetails(id)
     }
 }

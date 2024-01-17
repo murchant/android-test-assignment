@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,12 +31,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.shacklehotelbuddy.data.Respository
+import com.example.shacklehotelbuddy.data.SearchResultWithDetails
 import com.example.shacklehotelbuddy.ui.theme.ShackleHotelBuddyTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -66,55 +66,73 @@ class SearchResultsActivity : ComponentActivity() {
                 val searchResults = viewModel.viewSate.observeAsState()
                 when (searchResults.value) {
                     is SearchResultsViewModel.ViewState.Loading -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            IndeterminateCircularIndicator()
-                        }
+                        LoadingView()
                     }
+
                     is SearchResultsViewModel.ViewState.Empty -> {
-                        Header(::navigateBack)
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            Text(
-                                color = ShackleHotelBuddyTheme.colors.grayText,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                fontSize = TextUnit(22F, TextUnitType.Sp),
-                                modifier = Modifier
-                                    .align(Alignment.CenterHorizontally)
-                                    .padding(bottom = 16.dp),
-                                text = "No results found, try again please!"
-                            )
-                        }
+                        EmptyState()
                     }
+
                     is SearchResultsViewModel.ViewState.Success -> {
                         SearchResultsMainScreen(
                             (searchResults.value as SearchResultsViewModel.ViewState.Success).searchResults,
                             ::navigateBack
                         )
                     }
+
                     else -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
-                        ) {
-                            Header(::navigateBack)
-                            Text(text = "Error")
-                        }
+                        ErrorState()
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun ErrorState() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Header(::navigateBack)
+            Text(text = "Error")
+        }
+    }
+
+    @Composable
+    private fun EmptyState() {
+        Header(::navigateBack)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                color = ShackleHotelBuddyTheme.colors.grayText,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                fontSize = TextUnit(22F, TextUnitType.Sp),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 16.dp),
+                text = "No results found, try again please!"
+            )
+        }
+    }
+
+    @Composable
+    private fun LoadingView() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            IndeterminateCircularIndicator()
         }
     }
 
@@ -148,7 +166,7 @@ class SearchResultsActivity : ComponentActivity() {
 
 @Composable
 fun SearchResultsMainScreen(
-    hotelSearchResults: List<Respository.SearchResultWithDetails?>,
+    hotelSearchResults: List<SearchResultWithDetails?>,
     backButtonEvent: () -> Unit
 ) {
     Column {
@@ -192,7 +210,7 @@ private fun Header(backButtonEvent: () -> Unit) {
 }
 
 @Composable
-private fun SearchResult(searchResult: Respository.SearchResultWithDetails?) {
+private fun SearchResult(searchResult: SearchResultWithDetails?) {
     searchResult?.let {
         Column {
             Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
@@ -235,7 +253,7 @@ private fun SearchResult(searchResult: Respository.SearchResultWithDetails?) {
 }
 
 @Composable
-private fun StarAndRating(searchResult: Respository.SearchResultWithDetails) {
+private fun StarAndRating(searchResult: SearchResultWithDetails) {
     Row {
         Icon(
             painterResource(id = R.drawable.star),
@@ -273,6 +291,15 @@ fun IndeterminateCircularIndicator() {
 @Composable
 fun SearchPreview() {
     ShackleHotelBuddyTheme {
-//        SearchResultsMainScreen()
+        SearchResultsMainScreen(
+            listOf(
+                SearchResultWithDetails(
+                    hotelName = "Hotel 1",
+                    hotelCity = "London",
+                    hotelRating = "4.5",
+                    hotelImage = "http",
+                    price = "£100"
+                )
+            ), backButtonEvent = {})
     }
 }

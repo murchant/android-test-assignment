@@ -12,3 +12,11 @@ data class SearchParameter(
     @ColumnInfo(name="checkInDate") var checkInDate: String,
     @ColumnInfo(name="checkOutDate") var checkOutDate: String,
 )
+
+data class SearchResultWithDetails(
+    val hotelName: String,
+    val hotelCity: String,
+    val hotelRating: String,
+    val hotelImage: String,
+    val price: String
+)

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shacklehotelbuddy.data.Respository
+import com.example.shacklehotelbuddy.data.SearchResultWithDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -16,13 +17,6 @@ import javax.inject.Inject
 class SearchResultsViewModel @Inject constructor(
     private val repository: Respository
 ) : ViewModel() {
-
-    sealed class ViewState {
-        object Loading : ViewState()
-        data class Success(val searchResults: List<Respository.SearchResultWithDetails?>) : ViewState()
-        object Empty : ViewState()
-        object Error : ViewState()
-    }
 
     private val _viewState = MutableLiveData<ViewState>(ViewState.Loading)
     val viewSate: LiveData<ViewState>
@@ -55,8 +49,15 @@ class SearchResultsViewModel @Inject constructor(
         }
     }
 
-    fun extractDate(date: String): Triple<Int, Int, Int> {
+    private fun extractDate(date: String): Triple<Int, Int, Int> {
         val dateParts = date.split("T")[0].split("-")
         return Triple(dateParts[0].toInt(), dateParts[1].toInt(), dateParts[2].toInt())
+    }
+
+    sealed class ViewState {
+        object Loading : ViewState()
+        data class Success(val searchResults: List<SearchResultWithDetails?>) : ViewState()
+        object Empty : ViewState()
+        object Error : ViewState()
     }
 }

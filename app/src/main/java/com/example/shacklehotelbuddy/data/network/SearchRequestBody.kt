@@ -1,6 +1,5 @@
 package com.example.shacklehotelbuddy.data.network
 
-import android.location.Address
 import kotlinx.serialization.Serializable
 
 
