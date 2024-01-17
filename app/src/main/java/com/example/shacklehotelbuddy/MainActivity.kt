@@ -118,7 +118,7 @@ class MainActivity : ComponentActivity() {
     private fun navigateToSearchResults() {
         val currentState = viewModel.searchParameters.value
         currentState?.let {
-            if (it.adult != 0 && it.children != 0 && it.checkInDate != "" && it.checkOutDate != "") {
+            if (it.adult != 0  && it.checkInDate != "" && it.checkOutDate != "") {
                 viewModel.saveSearchParameters(currentState)
                 startActivity(
                     SearchResultsActivity.newIntent(

@@ -7,14 +7,12 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.plugin
-import io.ktor.serialization.kotlinx.json.json
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import kotlinx.serialization.encodeToString
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -34,7 +32,6 @@ class Service @Inject constructor() {
                 header("X-RapidAPI-Host", "hotels4.p.rapidapi.com")
                 contentType(ContentType.Application.Json)
                 setBody(searchRequestBody)
-//                setBody(searchRequestBody)
             }
         return response.body<SearchRequestResponse>()
     }

@@ -43,7 +43,7 @@ class SearchResultsViewModel @Inject constructor(
                     }
                 }
             } catch (e: HttpRequestTimeoutException) {
-                // I saw this crop up sometimes in testing
+                // I saw HttpRequestTimeoutException crop up sometimes in testing.
                 _viewState.postValue(ViewState.Error)
             }
         }
