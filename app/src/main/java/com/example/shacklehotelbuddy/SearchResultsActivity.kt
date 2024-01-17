@@ -15,17 +15,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -58,7 +64,56 @@ class SearchResultsActivity : ComponentActivity() {
         setContent {
             ShackleHotelBuddyTheme {
                 val searchResults = viewModel.viewSate.observeAsState()
-                SearchResultsMainScreen(searchResults.value ?: emptyList(), ::navigateBack)
+                when (searchResults.value) {
+                    is SearchResultsViewModel.ViewState.Loading -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            IndeterminateCircularIndicator()
+                        }
+                    }
+                    is SearchResultsViewModel.ViewState.Empty -> {
+                        Header(::navigateBack)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Text(
+                                color = ShackleHotelBuddyTheme.colors.grayText,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                fontSize = TextUnit(22F, TextUnitType.Sp),
+                                modifier = Modifier
+                                    .align(Alignment.CenterHorizontally)
+                                    .padding(bottom = 16.dp),
+                                text = "No results found, try again please!"
+                            )
+                        }
+                    }
+                    is SearchResultsViewModel.ViewState.Success -> {
+                        SearchResultsMainScreen(
+                            (searchResults.value as SearchResultsViewModel.ViewState.Success).searchResults,
+                            ::navigateBack
+                        )
+                    }
+                    else -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                        ) {
+                            Header(::navigateBack)
+                            Text(text = "Error")
+                        }
+                    }
+                }
             }
         }
     }
@@ -93,11 +148,14 @@ class SearchResultsActivity : ComponentActivity() {
 
 @Composable
 fun SearchResultsMainScreen(
-    hotelSearchResults: List<Respository.SearchResultWithDetails>,
+    hotelSearchResults: List<Respository.SearchResultWithDetails?>,
     backButtonEvent: () -> Unit
 ) {
     Column {
         Header(backButtonEvent)
+        if (hotelSearchResults.isEmpty()) {
+            IndeterminateCircularIndicator()
+        }
         LazyColumn {
             items(hotelSearchResults.size) { index ->
                 SearchResult(hotelSearchResults[index])
@@ -134,43 +192,45 @@ private fun Header(backButtonEvent: () -> Unit) {
 }
 
 @Composable
-private fun SearchResult(searchResult: Respository.SearchResultWithDetails) {
-    Column {
-        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
-            AsyncImage(
-                model = searchResult.hotelImage,
-                contentDescription = "",
-                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+private fun SearchResult(searchResult: Respository.SearchResultWithDetails?) {
+    searchResult?.let {
+        Column {
+            Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
+                AsyncImage(
+                    model = searchResult.hotelImage,
+                    contentDescription = "",
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .fillMaxSize()
+                        .height(200.dp)
+                )
+            }
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .fillMaxSize()
-                    .height(200.dp)
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = searchResult.hotelName,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+                StarAndRating(searchResult)
+            }
             Text(
-                text = searchResult.hotelName,
+                text = searchResult.hotelCity, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                color = ShackleHotelBuddyTheme.colors.grayText
+            )
+            Text(
+                text = "${searchResult.hotelPrice} night", modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
-            StarAndRating(searchResult)
         }
-        Text(
-            text = searchResult.hotelCity, modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            color = ShackleHotelBuddyTheme.colors.grayText
-        )
-        Text(
-            text = "${searchResult.hotelPrice} night", modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-        )
     }
 }
 
@@ -182,6 +242,29 @@ private fun StarAndRating(searchResult: Respository.SearchResultWithDetails) {
             contentDescription = ""
         )
         Text(text = searchResult.hotelRating)
+    }
+}
+
+@Composable
+fun IndeterminateCircularIndicator() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .width(64.dp)
+                .padding(bottom = 32.dp),
+            color = ShackleHotelBuddyTheme.colors.teal,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+        Text(
+            color = ShackleHotelBuddyTheme.colors.grayText,
+            text = "Please wait while we retrieve your results.."
+        )
     }
 }
 

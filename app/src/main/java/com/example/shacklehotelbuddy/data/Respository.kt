@@ -1,5 +1,6 @@
 package com.example.shacklehotelbuddy.data
 
+import android.util.Log
 import com.example.shacklehotelbuddy.data.network.Age
 import com.example.shacklehotelbuddy.data.network.CheckDate
 import com.example.shacklehotelbuddy.data.network.PropertyDetailsResponse
@@ -13,38 +14,51 @@ class Respository @Inject constructor(
     private val service: Service
 ) {
 
+    sealed class Result<out T> {
+        data class Success<out T>(val data: T) : Result<T>()
+        data class Error(val exception: Exception) : Result<Nothing>()
+        data class Empty(val message: String) : Result<Nothing>()
+    }
+
     suspend fun getSearchResults(
-        checkInDate: String,
-        checkOutDate: String,
+        checkInDate: Triple<Int, Int, Int>,
+        checkOutDate: Triple<Int, Int, Int>,
         adults: Int,
         children: Int
-    ): List<SearchResultWithDetails?> {
+    ): Result<List<SearchResultWithDetails?>> {
+        val childrenList = (0..children).map { Age(4) } // Set a Default age as it's not important for the task
+        Log.d("Respository", "getSearchResults: $checkInDate, $checkOutDate, $adults, $children $childrenList")
         val searchResults = service.getSearchResults(
             SearchRequestBody(
-                checkInDate = CheckDate(2024, 3, 1),
-                checkOutDate = CheckDate(2024, 3, 6),
+                checkInDate = CheckDate(checkInDate.first, checkInDate.second, checkInDate.third),
+                checkOutDate = CheckDate(checkOutDate.first, checkOutDate.second, checkOutDate.third),
                 rooms = listOf(
                     RoomConfiguration(
-                        adults = 1,
-                        children = listOf(Age(3)),
+                        adults = adults,
+                        children = childrenList,
                     )
                 ),
-                destination = Region("6054439"),
-                resultsSize = 10,
-                limit = 10
+                destination = Region("6195474"),
+                resultsSize = 5,
+                limit = 5
             )
         )
-        return searchResults.data.propertySearch.properties.map {
-            val details = getPropertyDetails(it.id)
-            details.data?.let { propertyDetails ->
-                SearchResultWithDetails(
-                    hotelName = propertyDetails.propertyInfo.summary.name,
-                    hotelCity = propertyDetails.propertyInfo.summary.location.address.city,
-                    hotelPrice = "£100",
-                    hotelRating = propertyDetails.propertyInfo.summary.overview.propertyRating.rating.toString(),
-                    hotelImage = it.propertyImage.image.url
-                )
+        if(searchResults.data === null) {
+            return Result.Empty("No results found")
+        } else {
+            val resultsWithData =  searchResults.data.propertySearch.properties.map {
+                val details = getPropertyDetails(it.id)
+                details.data?.let { propertyDetails ->
+                    SearchResultWithDetails(
+                        hotelName = propertyDetails.propertyInfo.summary.name,
+                        hotelCity = propertyDetails.propertyInfo.summary.location.address.city,
+                        hotelPrice = "£100",
+                        hotelRating = propertyDetails.propertyInfo.summary.overview.propertyRating.rating.toString(),
+                        hotelImage = it.propertyImage.image.url
+                    )
+                }
             }
+            return Result.Success(resultsWithData)
         }
     }
 

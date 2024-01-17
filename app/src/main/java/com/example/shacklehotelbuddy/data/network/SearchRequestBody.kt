@@ -48,7 +48,7 @@ data class PropertyRating(
 
 @Serializable
 data class SearchRequestResponse(
-    val data : ResultData,
+    val data : ResultData?, // nullable?
 )
 
 @Serializable
