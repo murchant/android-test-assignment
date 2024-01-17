@@ -9,13 +9,16 @@ import com.example.shacklehotelbuddy.data.Respository
 import com.example.shacklehotelbuddy.data.SearchResultWithDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.client.plugins.HttpRequestTimeoutException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchResultsViewModel @Inject constructor(
-    private val repository: Respository
+    private val repository: Respository,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _viewState = MutableLiveData<ViewState>(ViewState.Loading)
@@ -27,7 +30,7 @@ class SearchResultsViewModel @Inject constructor(
     }
 
     fun bind(checkInDate: String, checkOutDate: String, adults: Int, children: Int) {
-        viewModelScope.launch(coroutineUncaughtExceptionHandler) {
+        viewModelScope.launch(dispatcher + coroutineUncaughtExceptionHandler) {
             try {
                 when(val searchResults = repository.getSearchResults(extractDate(checkInDate), extractDate(checkOutDate), adults, children)) {
                     is Respository.Result.Success -> {
