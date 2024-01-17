@@ -11,7 +11,7 @@ You may need to change the api key for your own, in `Service.kt`.
 
 - MVVM architecture, with a repository layer to abstract the two data sources we're using.
 - Data source 1 is the remote API, which is accessed via Ktor. This is used for fetching results and details with the given parameters.
-- Data source 2 is the local database, which is accessed via Room. This is used for locally caching previous searches.
+- Data source 2 is the local database, which is accessed via Room. This is used for persisting previous searches. 
 - The views follow the unidirectional data flow pattern, where the view model is the single source of for the search parameters and the user edits them in the grid.
 This is done using liveData and the coroutines. Events from the compose views are passed up and the view model updates the liveData, which is then observed by the views.
 - When the user hits search the navigation is quite simple. We just start a new activity with the search parameters as extras, and pop in on the nav stack.
